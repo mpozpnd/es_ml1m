@@ -1,0 +1,95 @@
+version: '2'
+services:
+  es01:
+    build: .
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+    networks:
+      - esnet
+  es02:
+    build: .
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
+    volumes:
+      - esdata02:/usr/share/elasticsearch/data
+    ports:
+      - 9202:9200
+    networks:
+      - esnet
+  es03:
+    build: .
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.seed_hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
+    volumes:
+      - esdata03:/usr/share/elasticsearch/data
+    ports:
+      - 9203:9200
+    networks:
+      - esnet
+
+  kibana:
+    image: 'docker.elastic.co/kibana/kibana:7.6.2'
+    container_name: kibana
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      - esnet
+
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+  esdata03:
+    driver: local
+
+networks:
+  esnet:
